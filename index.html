@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Карточка Босса - Кибер-Дракон</title>
+  <style>
+    /* 1. СБРОС И СТИЛИ СТРАНИЦЫ */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background: #071410;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #4024a5;
+      overflow: hidden;
+    }
+
+    /* 2. КАРТОЧКА БОССА */
+    .boss-card {
+      background: rgba(25, 16, 41, 0.9);
+      border: 2px solid #ff0055;
+      border-radius: 20px;
+      padding: 30px;
+      width: 340px;
+      text-align: center;
+      box-shadow: 0 0 25px rgba(255, 0, 85, 0.4), 0 0 15px rgba(157, 0, 255, 0.3);
+      transition: transform 0.2s, filter 0.5s ease;
+      position: relative;
+    }
+
+    /* Аватарка босса */
+    .boss-avatar {
+      width: 140px;
+      height: 140px;
+      margin: 0 auto 15px auto;
+      border-radius: 50%;
+      background: #1e1133;
+      border: 3px solid #9d00ff;
+      box-shadow: 0 0 15px #9d00ff;
+      display: block;
+      transition: filter 0.5s ease, opacity 0.5s ease;
+    }
+
+    /* Имя босса */
+    .boss-name {
+      font-size: 24px;
+      font-weight: bold;
+      color: #ff0055;
+      text-shadow: 0 0 10px #ff0055;
+      margin-bottom: 5px;
+    }
+
+    /* Уровень */
+    .boss-level {
+      font-size: 14px;
+      color: #b388ff;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* 3. ПОЛОСКА ЗДОРОВЬЯ (HP Bar) */
+    .hp-container {
+      margin-bottom: 20px;
+    }
+
+    .hp-text {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #ffffff;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+
+    .hp-bar-bg {
+      width: 100%;
+      height: 22px;
+      background: #12361d;
+      border-radius: 11px;
+      overflow: hidden;
+      border: 1px solid #4c00ff;
+      box-shadow: inset 0 0 5px #000;
+    }
+
+    .hp-bar-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #00ff2a, #a200ff);
+      box-shadow: 0 0 10px #0084ff;
+      border-radius: 11px;
+      transition: width 0.3s ease-in-out;
+    }
+
+    /* 4. КНОПКИ ДЕЙСТВИЙ */
+    .controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px 10px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #ffffff;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .btn-attack {
+      background: linear-gradient(135deg, #ff0055, #990033);
+      box-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
+    }
+
+    .btn-attack:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 15px rgba(255, 0, 85, 0.8);
+    }
+
+    .btn-heal {
+      background: linear-gradient(135deg, #00cc66, #006633);
+      box-shadow: 0 0 10px rgba(0, 204, 102, 0.4);
+    }
+
+    .btn-heal:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 15px rgba(0, 204, 102, 0.7);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    /* 5. СОСТОЯНИЯ, АНИМАЦИИ И ЭФФЕКТ УРОНА */
+    
+    /* Состояние "Повершен" */
+    .boss-card.defeated {
+      border-color: #555555;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+    }
+
+    .boss-card.defeated .boss-avatar {
+      filter: grayscale(100%);
+      opacity: 0.6;
+    }
+
+    .boss-card.defeated .boss-name {
+      color: #888888;
+      text-shadow: none;
+    }
+
+    /* Анимации сотрясения */
+    .shake {
+      animation: shakeAnim 3s ease-in-out;
+    }
+
+    .shake-crit {
+      animation: shakeCritAnim 0.4s ease-in-out;
+    }
+
+    @keyframes shakeAnim {
+      0% { transform: translate(0, 0); }
+      20% { transform: translate(-8px, 4px); }
+      40% { transform: translate(8px, -4px); }
+      60% { transform: translate(-5px, -2px); }
+      80% { transform: translate(5px, 2px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    /* Сильная тряска при КРИТЕ */
+    @keyframes shakeCritAnim {
+      0% { transform: translate(0, 0) scale(1); }
+      20% { transform: translate(-15px, 8px) scale(1.03); }
+      40% { transform: translate(15px, -8px) scale(0.97); }
+      60% { transform: translate(-12px, 5px) scale(1.02); }
+      80% { transform: translate(12px, -5px) scale(0.99); }
+      100% { transform: translate(0, 0) scale(1); }
+    }
+
+    /* Всплывающие цифры урона */
+    .damage-pop {
+      position: absolute;
+      font-weight: 900;
+      font-size: 22px;
+      color: #ffffff;
+      text-shadow: 0 0 8px #ff0055, 0 0 12px #000;
+      pointer-events: none;
+      animation: floatUp 0.8s ease-out forwards;
+      z-index: 10;
+    }
+
+    .damage-pop.crit {
+      font-size: 32px;
+      color: #ffe600; /* Неоново-жёлтый для крита */
+      text-shadow: 0 0 10px #ffea00, 0 0 20px #ff0055, 0 0 5px #000;
+    }
+
+    @keyframes floatUp {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(0.8);
+      }
+      30% {
+        transform: translateY(-25px) scale(1.2);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-60px) scale(1);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="boss-card" id="bossCard">
+    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=BossDragon" alt="Кибер-Дракон" class="boss-avatar" id="bossAvatar">
+    
+    <div class="boss-name" id="bossName">Кибер-Дракон</div>
+    <div class="boss-level">Уровень 50 • МИФИЧЕСКИЙ</div>
+
+    <div class="hp-container">
+      <div class="hp-text" id="hpText">100 / 100 HP</div>
+      <div class="hp-bar-bg">
+        <div class="hp-bar-fill" id="hpBarFill"></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-attack" onclick="damage(event)">Ударить ⚔️</button>
+      <button class="btn btn-heal" onclick="heal()">Лечить 🧪</button>
+    </div>
+  </div>
+
+  <script>
+    let maxHp = 100;
+    let currentHp = 100;
+
+    const bossCard = document.getElementById('bossCard');
+    const bossName = document.getElementById('bossName');
+    const hpText = document.getElementById('hpText');
+    const hpBarFill = document.getElementById('hpBarFill');
+
+    function updateUI() {
+      hpText.textContent = `${currentHp} / ${maxHp} HP`;
+      let hpPercent = (currentHp / maxHp) * 100;
+      hpBarFill.style.width = hpPercent + '%';
+
+      if (currentHp <= 0) {
+        bossName.textContent = 'ПОВЕРЖЕН';
+        bossCard.classList.add('defeated');
+      } else {
+        bossName.textContent = 'Кибер-Дракон';
+        bossCard.classList.remove('defeated');
+      }
+    }
+
+    // --- ФУНКЦИЯ АТАКИ С КРИТИЧЕСКИМ УРОНОМ ---
+    function damage(event) {
+      if (currentHp <= 0) return;
+
+      // 1. Определение типа удара (Шанс крита 25%)
+      const isCrit = Math.random() < 0.25;
+      const dmgValue = isCrit ? 40 : 20;
+
+      // 2. Отнимаем здоровье
+      currentHp = Math.max(0, currentHp - dmgValue);
+
+      // 3. Вызываем анимацию сотрясения в зависимости от крита
+      triggerShake(isCrit);
+
+      // 4. Показываем всплывающие цифры урона
+      showDamagePop(event, dmgValue, isCrit);
+
+      // 5. Обновляем UI
+      updateUI();
+    }
+
+    function heal() {
+      currentHp = Math.min(maxHp, currentHp + 20);
+      updateUI();
+    }
+
+    // --- ТРЯСКА С УЧЕТОМ КРИТА ---
+    function triggerShake(isCrit) {
+      bossCard.classList.remove('shake', 'shake-crit');
+      
+      setTimeout(() => {
+        if (isCrit) {
+          bossCard.classList.add('shake-crit');
+        } else {
+          bossCard.classList.add('shake');
+        }
+      }, 10);
+    }
+
+    // --- ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ ВЫЛЕТАЮЩИХ ЦИФР ---
+    function showDamagePop(event, dmg, isCrit) {
+      const pop = document.createElement('div');
+      pop.classList.add('damage-pop');
+      if (isCrit) pop.classList.add('crit');
+
+      pop.textContent = isCrit ? `-${dmg} CRIT!` : `-${dmg}`;
+
+      // Позиционируем цифры относительно места клика по карточке
+      const rect = bossCard.getBoundingClientRect();
+      const x = event.clientX - rect.left - 20;
+      const y = event.clientY - rect.top - 30;
+
+      pop.style.left = `${x}px`;
+      pop.style.top = `${y}px`;
+
+      bossCard.appendChild(pop);
+
+      // Удаляем элемент из памяти после анимации
+      setTimeout(() => {
+        pop.remove();
+      }, 800);
+    }
+  </script>
+</body>
+</html>
